@@ -31,17 +31,7 @@
 #include <stdlib.h>  /* for malloc, free */
 #include <string.h>  /* for memcmp, memmove */
 
-/* You will probably want to move the following declarations to a central
-   header file.
-*/
-
-struct stemmer;
-
-extern struct stemmer * create_stemmer(void);
-extern void free_stemmer(struct stemmer * z);
-
-extern int stem(struct stemmer * z, char * b, int k);
-
+#include "porter.h"
 
 
 /* The main part of the stemming algorithm starts here.
@@ -49,16 +39,6 @@ extern int stem(struct stemmer * z, char * b, int k);
 
 #define TRUE 1
 #define FALSE 0
-
-/* stemmer is a structure for a few local bits of data,
-*/
-
-struct stemmer {
-   char * b;       /* buffer for word to be stemmed */
-   int k;          /* offset to the end of the string */
-   int j;          /* a general offset into the string */
-};
-
 
 /* Member b is a buffer holding a word to be stemmed. The letters are in
    b[0], b[1] ... ending at b[z->k]. Member k is readjusted downwards as
@@ -356,7 +336,7 @@ static void step5(struct stemmer * z)
    z->j = z->k;
    if (b[z->k] == 'e')
    {  int a = m(z);
-      if (a > 1 || a == 1 && !cvc(z, z->k - 1)) z->k--;
+      if (a > 1 || (a == 1 && !cvc(z, z->k - 1))) z->k--;
    }
    if (b[z->k] == 'l' && doublec(z, z->k) && m(z) > 1) z->k--;
 }
@@ -382,60 +362,3 @@ extern int stem(struct stemmer * z, char * b, int k)
    return z->k;
 }
 
-/*--------------------stemmer definition ends here------------------------*/
-#if 0
-#include <stdio.h>
-#include <stdlib.h>      /* for malloc, free */
-#include <ctype.h>       /* for isupper, islower, tolower */
-
-static char * s;         /* buffer for words tobe stemmed */
-
-#define INC 50           /* size units in which s is increased */
-static int i_max = INC;  /* maximum offset in s */
-
-#define LETTER(ch) (isupper(ch) || islower(ch))
-
-void stemfile(struct stemmer * z, FILE * f)
-{  while(TRUE)
-   {  int ch = getc(f);
-      if (ch == EOF) return;
-      if (LETTER(ch))
-      {  int i = 0;
-         while(TRUE)
-         {  if (i == i_max)
-            {  i_max += INC;
-               s = realloc(s, i_max + 1);
-            }
-            ch = tolower(ch); /* forces lower case */
-
-            s[i] = ch; i++;
-            ch = getc(f);
-            if (!LETTER(ch)) { ungetc(ch,f); break; }
-         }
-         s[stem(z, s, i - 1) + 1] = 0;
-         /* the previous line calls the stemmer and uses its result to
-            zero-terminate the string in s */
-         printf("%s",s);
-      }
-      else putchar(ch);
-   }
-}
-
-int main(int argc, char * argv[])
-{  int i;
-
-   struct stemmer * z = create_stemmer();
-
-   s = (char *) malloc(i_max + 1);
-   for (i = 1; i < argc; i++)
-   {  FILE * f = fopen(argv[i],"r");
-      if (f == 0) { fprintf(stderr,"File %s not found\n",argv[i]); exit(1); }
-      stemfile(z, f);
-   }
-   free(s);
-
-   free_stemmer(z);
-
-   return 0;
-}
-#endif

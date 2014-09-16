@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "PorterStemmer.h"
 
-#import "porter.c"
+#import "porter.h"
 
 #define MAX_STEMMER_STRING_LEN	256
 
