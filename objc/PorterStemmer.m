@@ -13,6 +13,7 @@
     struct stemmer stemmer;
 	char stemBuffer[MAX_STEMMER_STRING_LEN];
 
+	input = [input lowercaseString];
 	strncpy(stemBuffer, [input cStringUsingEncoding:NSUTF8StringEncoding], MAX_STEMMER_STRING_LEN - 1);
 	
 	int i = (int)strlen(stemBuffer);
